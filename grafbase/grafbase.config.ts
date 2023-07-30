@@ -1,5 +1,6 @@
 import { g, auth, config } from '@grafbase/sdk'
 
+//@ts-ignore
 const User = g.model('User', {
   name: g.string().length({ min: 2, max: 20 }),
   email: g.string().unique(),
@@ -8,8 +9,11 @@ const User = g.model('User', {
   githubUrl: g.url().optional(),
   linkedInUrl: g.url().optional(),
   projects: g.relation(() => Project).list().optional(), // each use can relation to many projects, initially can be zero so its optional
+}).auth((rules) => {
+  rules.public().read() // everyone can read the users
 })
 
+//@ts-ignore
 const Project = g.model('Project', {
   title: g.string().length({ min: 3 }),
   description: g.string(),
@@ -18,6 +22,16 @@ const Project = g.model('Project', {
   githubUrl: g.url(),
   category: g.string().search(),
   createdBy: g.relation(() => User),
+}).auth((rules) => {
+  rules.public().read() // everyone can read the users
+  rules.private().create().delete().update() // not everyone can create, delete and update
+})
+
+// https://next-auth.js.org/configuration/options#description-1
+// generate jwt secret using: openssl rand -base64 32
+const jwt = auth.JWT({
+  issuer: 'grafbase',
+  secret: g.env('NEXTAUTH_SECRET'),
 })
 
 // Welcome to Grafbase!
@@ -65,7 +79,13 @@ const user = g.model('User', {
 */
 
 export default config({
-  schema: g
+  schema: g,
+  auth: {
+    providers: [jwt],
+    rules: (rules) => {
+      rules.private()
+    }
+  }
   // Integrate Auth
   // https://grafbase.com/docs/auth
   // auth: {
