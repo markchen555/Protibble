@@ -7,7 +7,7 @@ const User = g.model('User', {
   avatarUrl: g.url(),
   description: g.string().optional(),
   githubUrl: g.url().optional(),
-  linkedInUrl: g.url().optional(),
+  linkedinUrl: g.url().optional(),
   projects: g.relation(() => Project).list().optional(), // each use can relation to many projects, initially can be zero so its optional
 }).auth((rules) => {
   rules.public().read() // everyone can read the users
