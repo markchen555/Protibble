@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState, ChangeEvent, useEffect } from "react";
 import Image from "next/image";
-import { FormState, ProjectInterface, SessionInterface } from "@/common.types";
-import { categoryFilters } from "@/constants";
-import FormField from "./FormField";
-import CustomMenu from "./CustomMenu";
-import Button from "./Button";
-import { createNewProject, fetchToken } from "@/lib/actions";
+import React, { useState, ChangeEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
+
+import FormField from "./FormField";
+import Button from "./Button";
+import CustomMenu from "./CustomMenu";
+import { categoryFilters } from "@/constants";
+import { updateProject, createNewProject, fetchToken } from "@/lib/actions";
+import { FormState, ProjectInterface, SessionInterface } from "@/common.types";
 
 type Props = {
   type: string;
@@ -18,6 +19,7 @@ type Props = {
 
 const ProjectForm = ({ type, project, session }: Props) => {
   const router = useRouter();
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState<FormState>({
     title: project?.title || "",
@@ -38,6 +40,12 @@ const ProjectForm = ({ type, project, session }: Props) => {
     try {
       if (type == "create") {
         await createNewProject(form, session?.user?.id, token);
+
+        router.push("/");
+      }
+
+      if (type === "edit") {
+        await updateProject(form, project?.id as string, token);
 
         router.push("/");
       }

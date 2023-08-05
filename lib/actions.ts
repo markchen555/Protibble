@@ -1,5 +1,5 @@
 import { GraphQLClient } from "graphql-request";
-import { createProjectMutation, createUserMutation, getUserQuery, projectsQuery } from "@/graphql";
+import { createProjectMutation, createUserMutation, deleteProjectMutation, getProjectByIdQuery, getProjectsOfUserQuery, getUserQuery, projectsQuery, updateProjectMutation } from "@/graphql";
 import { ProjectForm } from "@/common.types";
 
 const isProduction = process.env.NODE_ENV === 'production';
@@ -64,7 +64,7 @@ export const createNewProject = async (form: ProjectForm, creatorId: string, tok
 	const imageUrl = await uploadImage(form.image);
 
 	if (imageUrl.url) {
-		client.setHeader("Authorization", `Bearer ${token}`);
+		client.setHeader("Authorization", `Bearer ${token}`); // use authorizatoin because it's one of the secure actions
 
 		const variables = {
 			input: {
@@ -80,8 +80,56 @@ export const createNewProject = async (form: ProjectForm, creatorId: string, tok
 	}
 };
 
-export const fetchAllProjects = async (category?: string, endcursor?: string) => {
+export const fetchAllProjects = (category?: string | null, endcursor?: string | null) => {
 	client.setHeader("x-api-key", apiKey);
 
 	return makeGraphQLRequest(projectsQuery, { category, endcursor });
+};
+
+export const getProjectDetails = (id: string) => {
+	client.setHeader("x-api-key", apiKey);
+
+	return makeGraphQLRequest(getProjectByIdQuery, { id });
 }
+
+export const getUserProjects = (id: string, last?: number) => {
+	client.setHeader("x-api-key", apiKey);
+
+	return makeGraphQLRequest(getProjectsOfUserQuery, { id, last });
+}
+
+export const deleteProject = (id: string, token: string) => {
+	client.setHeader("Authorization", `Bearer ${token}`); // use authorizatoin because it's one of the secure actions
+
+	return makeGraphQLRequest(deleteProjectMutation, { id });
+}
+
+export const updateProject = async (form: ProjectForm, projectId: string, token: string) => {
+	function isBase64DataURL(value: string) {
+		const base64Regex = /^data:image\/[a-z]+;base64,/;
+		return base64Regex.test(value);
+	}
+
+	let updatedForm = { ...form };
+
+	const isUploadingNewImage = isBase64DataURL(form.image);
+
+	// if the url of the image is base64 string -> it's new upload
+	// if the url of the image contain cloudary -> it's old upload
+	if (isUploadingNewImage) {
+		const imageUrl = await uploadImage(form.image);
+
+		if (imageUrl.url) {
+			updatedForm = { ...updatedForm, image: imageUrl.url };
+		}
+	}
+
+	client.setHeader("Authorization", `Bearer ${token}`);
+
+	const variables = {
+		id: projectId,
+		input: updatedForm,
+	};
+
+	return makeGraphQLRequest(updateProjectMutation, variables);
+};
