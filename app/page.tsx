@@ -1,4 +1,6 @@
 import { ProjectInterface } from "@/common.types";
+import Categories from "@/components/Categories";
+import LoadMore from "@/components/LoadMore";
 import ProjectCard from "@/components/ProjectCard";
 import { fetchAllProjects } from "@/lib/actions";
 import Image from "next/image";
@@ -24,6 +26,11 @@ type ProjectSearch = {
   };
 };
 
+// temporary fix to force page to reload
+export const dynamic = "force-dynamic";
+export const dynamicParams = true;
+export const revalidate = 0;
+
 const Home = async ({ searchParams: { category, endcursor } }: Props) => {
   const data = (await fetchAllProjects(category, endcursor)) as ProjectSearch;
 
@@ -32,7 +39,7 @@ const Home = async ({ searchParams: { category, endcursor } }: Props) => {
   if (projectsToDisplay.length === 0) {
     return (
       <section className="flexStart flex-col paddings">
-        Categories
+        <Categories />
         <p className="no-result-text text-center">
           No projects found, go create some first.
         </p>
@@ -42,7 +49,7 @@ const Home = async ({ searchParams: { category, endcursor } }: Props) => {
 
   return (
     <section className="flex-start flex-col paddings mb-16">
-      <h1>Categories</h1>
+      <Categories />
 
       <section className="projects-grid">
         {projectsToDisplay.map(({ node }: { node: ProjectInterface }) => (
@@ -58,7 +65,12 @@ const Home = async ({ searchParams: { category, endcursor } }: Props) => {
         ))}
       </section>
 
-      <h1>LoadMore</h1>
+      <LoadMore
+        startCursor={data?.projectSearch?.pageInfo?.startCursor}
+        endCursor={data?.projectSearch?.pageInfo?.endCursor}
+        hasPreviousPage={data?.projectSearch?.pageInfo?.hasPreviousPage}
+        hasNextPage={data?.projectSearch?.pageInfo.hasNextPage}
+      />
     </section>
   );
 };
