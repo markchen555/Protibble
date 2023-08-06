@@ -29,7 +29,7 @@ const Project = async ({ params: { id } }: { params: { id: string } }) => {
         <div className="flex flex-1 items-start gap-5 w-full max-xs:flex-col">
           <Link href={renderLink()}>
             <Image
-              src={projectDetails?.createdBy?.avatarUrl}
+              src={projectDetails?.createdBy?.avatarUrl!}
               width={50}
               height={50}
               alt="profile"
@@ -77,7 +77,7 @@ const Project = async ({ params: { id } }: { params: { id: string } }) => {
 
         <div className="flex flex-wrap mt-5 gap-5">
           <Link
-            href={projectDetails?.githubUrl}
+            href={projectDetails?.githubUrl!}
             target="_blank"
             rel="noreferrer"
             className="flexCenter gap-2 tex-sm font-medium text-primary-purple"
@@ -86,7 +86,7 @@ const Project = async ({ params: { id } }: { params: { id: string } }) => {
           </Link>
           <Image src="/dot.svg" width={4} height={4} alt="dot" />
           <Link
-            href={projectDetails?.liveSiteUrl}
+            href={projectDetails?.liveSiteUrl!}
             target="_blank"
             rel="noreferrer"
             className="flexCenter gap-2 tex-sm font-medium text-primary-purple"
@@ -100,7 +100,7 @@ const Project = async ({ params: { id } }: { params: { id: string } }) => {
         <span className="w-full h-0.5 bg-light-white-200" />
         <Link href={renderLink()} className="min-w-[82px] h-[82px]">
           <Image
-            src={projectDetails?.createdBy?.avatarUrl}
+            src={projectDetails?.createdBy?.avatarUrl!}
             className="rounded-full"
             width={82}
             height={82}
@@ -111,8 +111,8 @@ const Project = async ({ params: { id } }: { params: { id: string } }) => {
       </section>
 
       <RelatedProjects
-        userId={projectDetails?.createdBy?.id}
-        projectId={projectDetails?.id}
+        userId={projectDetails?.createdBy?.id!}
+        projectId={projectDetails?.id!}
       />
     </Modal>
   );
