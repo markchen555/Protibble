@@ -89,10 +89,6 @@ const ProjectForm = ({ type, project, session }: Props) => {
     }));
   };
 
-  useEffect(() => {
-    console.log("form", form);
-  }, [form]);
-
   return (
     <form onSubmit={handleFormSubmit} className="flexStart form">
       <div className="flexStart form_image-container">
